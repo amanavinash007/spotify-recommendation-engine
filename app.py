@@ -3,22 +3,25 @@ from flask_session import Session
 import requests
 import os
 import base64
+from dotenv import load_dotenv  # Add this import
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SESSION_TYPE'] = 'filesystem'  # Use filesystem for sessions
-app.secret_key = os.urandom(24)  # Generate a secret key for session encryption
+app.config['SESSION_TYPE'] = 'filesystem'  
+app.secret_key = os.urandom(24)
 app.config['SESSION_COOKIE_NAME'] = 'session'
 Session(app)
 
-# Spotify app credentials
-CLIENT_ID = 'a157ca37f296409b8ec7c14667a5831b'
-CLIENT_SECRET = 'e5ea6488ab5e4e63b83aca706a9c733c'
-REDIRECT_URI = 'http://localhost:5000/callback'
+# Spotify app credentials (now fetched from environment variables)
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
 
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
-# Step 1: Redirect to Spotify login
 @app.route('/login')
 def login():
     auth_url = f"{AUTH_URL}?client_id={CLIENT_ID}&response_type=code&redirect_uri={REDIRECT_URI}&scope=user-top-read user-library-read"
