@@ -6,7 +6,7 @@ import base64
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'  # Use filesystem for sessions
-app.secret_key = os.urandom(24)
+app.secret_key = os.urandom(24)  # Generate a secret key for session encryption
 app.config['SESSION_COOKIE_NAME'] = 'session'
 Session(app)
 
@@ -18,10 +18,6 @@ REDIRECT_URI = 'http://localhost:5000/callback'
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
-@app.route('/')
-def home():
-    return "Welcome to the Spotify Recommendation Dashboard!"
-
 # Step 1: Redirect to Spotify login
 @app.route('/login')
 def login():
@@ -31,40 +27,43 @@ def login():
 # Step 2: Handle callback and exchange code for tokens
 @app.route('/callback')
 def callback():
-    code = request.args.get('code')
-    auth_header = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode('utf-8')
+    code = request.args.get('code')  # Get authorization code from the callback
+    auth_header = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode('utf-8')  # Base64 encode client credentials
     data = {
-        'grant_type': 'authorization_code',
+        'grant_type': 'authorization_code',  # We are using the 'authorization_code' grant type
         'code': code,
         'redirect_uri': REDIRECT_URI
     }
     headers = {
         'Authorization': f'Basic {auth_header}'
     }
-    response = requests.post(TOKEN_URL, data=data, headers=headers)
-    response_data = response.json()
-    session['token'] = response_data['access_token']
-    return redirect(url_for('user_home'))
+    response = requests.post(TOKEN_URL, data=data, headers=headers)  # Exchange the code for tokens
+    response_data = response.json()  # Get the response as a JSON object
+    if response.status_code == 200:
+        session['token'] = response_data['access_token']  # Store access token in the session
+        return redirect(url_for('user_home'))  # Redirect to home page (user data)
+    else:
+        return "Error: Unable to authenticate", 400
 
 # Step 3: Use the token to get the user's top tracks or artists
 @app.route('/home')
 def user_home():
-    token = session.get('token')
+    token = session.get('token')  # Get token from session
     if token:
         headers = {
-            'Authorization': f'Bearer {token}'
+            'Authorization': f'Bearer {token}'  # Pass the token as a Bearer token in the Authorization header
         }
-        top_tracks = requests.get('https://api.spotify.com/v1/me/top/artists', headers=headers).json()
+        top_tracks = requests.get('https://api.spotify.com/v1/me/top/artists', headers=headers).json()  # Fetch top artists
         return render_template('home.html', top_tracks=top_tracks)
     else:
-        return redirect(url_for('login'))
+        return redirect(url_for('login'))  # Redirect to login if no token exists
 
 @app.route('/recommendations')
 def recommendations():
-    token = session.get('token')
+    token = session.get('token')  # Get token from session
     if token:
         headers = {
-            'Authorization': f'Bearer {token}'
+            'Authorization': f'Bearer {token}'  # Pass token in Authorization header
         }
         
         # Get the user's top artists
