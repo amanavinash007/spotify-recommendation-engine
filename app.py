@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, session, url_for
+from flask import Flask, redirect, request, session, url_for, render_template
 from flask_session import Session
 import requests
 import os
@@ -44,11 +44,11 @@ def callback():
     response = requests.post(TOKEN_URL, data=data, headers=headers)
     response_data = response.json()
     session['token'] = response_data['access_token']
-    return redirect(url_for('home'))
+    return redirect(url_for('user_home'))
 
 # Step 3: Use the token to get the user's top tracks or artists
 @app.route('/home')
-def home():
+def user_home():
     token = session.get('token')
     if token:
         headers = {
@@ -58,10 +58,6 @@ def home():
         return render_template('home.html', top_tracks=top_tracks)
     else:
         return redirect(url_for('login'))
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
 
 @app.route('/recommendations')
 def recommendations():
@@ -87,3 +83,6 @@ def recommendations():
         return render_template('recommendations.html', recommendations=recommendations['tracks'])
     else:
         return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
