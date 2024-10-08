@@ -18,6 +18,10 @@ REDIRECT_URI = 'http://localhost:5000/callback'
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
+@app.route('/')
+def home():
+    return "Welcome to the Spotify Recommendation Dashboard!"
+
 # Step 1: Redirect to Spotify login
 @app.route('/login')
 def login():
