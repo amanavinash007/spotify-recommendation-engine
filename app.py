@@ -5,6 +5,7 @@ import os
 import base64
 
 app = Flask(__name__)
+app.config['SESSION_TYPE'] = 'filesystem'  # Use filesystem for sessions
 app.secret_key = os.urandom(24)
 app.config['SESSION_COOKIE_NAME'] = 'session'
 Session(app)
