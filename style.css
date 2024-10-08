@@ -1,0 +1,31 @@
+body {
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.recommendations {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.track-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 10px;
+    width: 200px;
+    text-align: center;
+}
+
+.track-card img {
+    width: 100%;
+    height: auto;
+}
+
+.track-card p {
+    margin: 10px 0;
+}
